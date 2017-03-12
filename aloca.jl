@@ -3,7 +3,7 @@ MIN_BANDWIDTH = 10
 Σ = sum
 Π = prod
 
-type VirtualInfrastructure
+type VirtualMachine
     cp::Float64
     links::Array{Tuple{Float64,Float64}} #links são enlaces virtuais seguindo a ordem (dest,weight)
     LRC_index::Float64
@@ -15,11 +15,11 @@ type Server
     residual::Float64
     custo_beneficio::Float64
     desempenho::Float64
-    VIs::Array{VirtualInfrastructure}
+    VMs::Array{VirtualMachine}
 end
 
-Base.isless(x::VirtualInfrastructure, y::VirtualInfrastructure) = x.LRC_index > y.LRC_index
-Base.isequal(x::VirtualInfrastructure, y::VirtualInfrastructure) = x.LRC_index == y.LRC_index
+Base.isless(x::VirtualMachine, y::VirtualMachine) = x.LRC_index > y.LRC_index
+Base.isequal(x::VirtualMachine, y::VirtualMachine) = x.LRC_index == y.LRC_index
 
 function set_lrc_index(VNR)
     for vi in VNR
@@ -44,18 +44,18 @@ function gera_Gs_BandM(n_nodes)
 end
 
 function gera_VNR(n_nodes)
-    VNR = Array{VirtualInfrastructure}(0)
+    VNR = Array{VirtualMachine}(0)
     CP_MIN = 1
     CP_MAX = 10
     BAND_MIN = 5
     BAND_MAX = 20
     for i=1:n_nodes
         links = rand(0:n_nodes)
-        VI = VirtualInfrastructure(rand(CP_MIN:CP_MAX), [], 0.0)
+        VM = VirtualMachine(rand(CP_MIN:CP_MAX), [], 0.0)
         for j=1:links
-            push!(VI.links, (rand(1:n_nodes), rand(BAND_MIN:BAND_MAX)))
+            push!(VM.links, (rand(1:n_nodes), rand(BAND_MIN:BAND_MAX)))
         end
-        push!(VNR, VI)
+        push!(VNR, VM)
     end
     return VNR
 end
@@ -97,11 +97,11 @@ function parallel_calc_residual(server, vnr_cp)
     server.residual = server.cp_atual - vnr_cp
 end
 
-function calc_residual(Gs::Array{Server},vnr::VirtualInfrastructure)
+function calc_residual(Gs::Array{Server},vnr::VirtualMachine)
     return pmap(x->parallel_calc_residual(x,vnr.cp),Gs)
 end
 
-function calc_custo_beneficio(Gs::Array{Server}, BandM::Array{Float64},vnr::VirtualInfrastructure)
+function calc_custo_beneficio(Gs::Array{Server}, BandM::Array{Float64},vnr::VirtualMachine)
     Band_v = Σ([link[2] for link in vnr.links])
     for i=1:length(Gs)
         println(vnr.cp, " / ", Gs[i].cp_atual, " + ", Band_v, " / ", Σ([k for k in BandM[i,1:size(BandM,1)]]), " = ")
@@ -158,7 +158,7 @@ end
 for i=1:length(Gs)
     j=1
     for current_field in fieldnames(Server)
-        if current_field != :VIs
+        if current_field != :VMs
             setfield!(Gs[i], current_field, Gs_data_from_file[i, j])
             j += 1
         end
@@ -167,19 +167,19 @@ end
 
 println("\n", Gs, "\n", BandM, "\n")
 
-VNR = Array{VirtualInfrastructure}(0)
+VNR = Array{VirtualMachine}(0)
 VNR_data_from_file = readdlm("VNR")
 n_linhas = size(VNR_data_from_file, 1)
 n_colunas = size(VNR_data_from_file, 2)
 for i=1:n_linhas
     node = [Float64(k) for k in VNR_data_from_file[i, 1:n_colunas] if k != ""]
-    VI = VirtualInfrastructure(node[1], [], 0.0)
+    VM = VirtualMachine(node[1], [], 0.0)
     deleteat!(node,1)
     while length(node) > 0
-        push!(VI.links, (node[1], node[2]))
+        push!(VM.links, (node[1], node[2]))
         deleteat!(node, [1,2])
     end
-    push!(VNR, VI)
+    push!(VNR, VM)
 end
 
 set_lrc_index(VNR)
