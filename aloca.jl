@@ -12,7 +12,7 @@ end
 type Server
     cp_top::Float64
     cp_atual::Float64
-    residual::Float64
+    cp_residual::Float64
     custo_beneficio::Float64
     desempenho::Float64
     VMs::Array{VirtualMachine}
@@ -78,7 +78,7 @@ function MAUT_marginalUtilty_custo_beneficio(array_criteria::Array{Float64})
     return copy!(array_criteria, pmap(x -> (exp(x^2)-1)/exp(1), array_criteria))
 end
 
-function MAUT_marginalUtility_residual(array_criteria::Array{Float64})
+function MAUT_marginalUtility_cp_residual(array_criteria::Array{Float64})
     return copy!(array_criteria, pmap(x -> (exp(x^2)-1)/exp(1), array_criteria))
 end
 
@@ -86,19 +86,19 @@ function MAUT_globalUtility(array_criterias, pesos)
     for i in array_criterias["custo_beneficio"]
         i *= pesos["custo_beneficio"]
     end
-    for i in array_criterias["residual"]
-        i *= pesos["residual"]
+    for i in array_criterias["cp_residual"]
+        i *= pesos["cp_residual"]
     end
-    result = array_criterias["custo_beneficio"] + array_criterias["residual"]
+    result = array_criterias["custo_beneficio"] + array_criterias["cp_residual"]
     return result
 end
 
-function parallel_calc_residual(server, vnr_cp)
-    server.residual = server.cp_atual - vnr_cp
+function parallel_calc_cp_residual(server, vnr_cp)
+    server.cp_residual = server.cp_atual - vnr_cp
 end
 
-function calc_residual(Gs::Array{Server},vnr::VirtualMachine)
-    return pmap(x->parallel_calc_residual(x,vnr.cp),Gs)
+function calc_cp_residual(Gs::Array{Server},vnr::VirtualMachine)
+    return pmap(x->parallel_calc_cp_residual(x,vnr.cp),Gs)
 end
 
 function calc_custo_beneficio(Gs::Array{Server}, BandM::Array{Float64},vnr::VirtualMachine)
@@ -111,7 +111,7 @@ function calc_custo_beneficio(Gs::Array{Server}, BandM::Array{Float64},vnr::Virt
 end
 
 #C_{r}(p) = c_{p} - c_{v}, sendo:
-#C_{r}(p) a capacidade residual de p;
+#C_{r}(p) a capacidade cp_residual de p;
 #c_{p} = capacidade original de p (o total);
 #c_{v} = capacidade solicitada pelo cliente (virtual)
 
@@ -126,9 +126,9 @@ end
 # println(Gs, "\n", BandM)
 
 # MAUT_criteria_custo_beneficio = [Float64(k.custo_beneficio) for k in Gs]
-# MAUT_criteria_residual = [Float64(k.residual) for k in Gs]
+# MAUT_criteria_cp_residual = [Float64(k.cp_residual) for k in Gs]
 
-# println("custo: ", MAUT_criteria_custo_beneficio, "\nresidual: ", MAUT_criteria_residual, "")
+# println("custo: ", MAUT_criteria_custo_beneficio, "\ncp_residual: ", MAUT_criteria_cp_residual, "")
 # VNR  = gera_VNR(3)
 
 # #println("\n", VNR, "\n")
@@ -192,8 +192,8 @@ println("VNR => ", VNR, "\n")
 
 calc_custo_beneficio(Gs, BandM, VNR[1])
 println("custo pos calc: ", [Float64(k.custo_beneficio) for k in Gs], "\n")
-calc_residual(Gs, VNR[1])
-println("residual pos calc: ", [Float64(k.residual) for k in Gs], "\n")
+calc_cp_residual(Gs, VNR[1])
+println("cp_residual pos calc: ", [Float64(k.cp_residual) for k in Gs], "\n")
 
 array_criteria_custo_beneficio = [Float64(k.custo_beneficio) for k in Gs]
 MAUT_norm_criteria_max(array_criteria_custo_beneficio)
@@ -203,14 +203,14 @@ println("custo pos norm: ", array_criteria_custo_beneficio, "\n")
 MAUT_marginalUtilty_custo_beneficio(array_criteria_custo_beneficio)
 println("custo pos U: ", array_criteria_custo_beneficio, "\n")
 
-array_criteria_residual = [k.residual for k in Gs]
+array_criteria_cp_residual = [k.cp_residual for k in Gs]
 
-MAUT_norm_criteria_max(array_criteria_residual)
-println("residual pos norm: ", array_criteria_residual, "\n")
-MAUT_marginalUtility_residual(array_criteria_residual)
-println("residual pos U: ", array_criteria_residual, "\n")
+MAUT_norm_criteria_max(array_criteria_cp_residual)
+println("cp_residual pos norm: ", array_criteria_cp_residual, "\n")
+MAUT_marginalUtility_cp_residual(array_criteria_cp_residual)
+println("cp_residual pos U: ", array_criteria_cp_residual, "\n")
 
-PESOS = Dict("custo_beneficio" => 0.65, "residual" => 0.35)
-array_criterias = Dict("custo_beneficio" => array_criteria_custo_beneficio, "residual" => array_criteria_residual)
+PESOS = Dict("custo_beneficio" => 0.65, "cp_residual" => 0.35)
+array_criterias = Dict("custo_beneficio" => array_criteria_custo_beneficio, "cp_residual" => array_criteria_cp_residual)
 result = MAUT_globalUtility(array_criterias, PESOS)
 println(result)
