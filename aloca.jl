@@ -94,18 +94,11 @@ function MAUT_marginalUtility_cp_residual(array_criteria::Array{Float64})
 end
 
 function MAUT_globalUtility(array_criterias, pesos)
-    for i in array_criterias["custo_beneficio"]
-        i *= pesos["custo_beneficio"]
-    end
-    for i in array_criterias["cp_residual"]
-        i *= pesos["cp_residual"]
-    end
-    for i in array_criterias["storage_residual"]
-        i *= pesos["storage_residual"]
-    end
-    for i in array_criterias["memory_residual"]
-        i *= pesos["memory_residual"]
-    end
+    copy!(array_criterias["custo_beneficio"], array_criterias["custo_beneficio"]*pesos["custo_beneficio"])
+    copy!(array_criterias["cp_residual"], array_criterias["cp_residual"]*pesos["cp_residual"])
+    copy!(array_criterias["storage_residual"], array_criterias["storage_residual"]*pesos["storage_residual"])
+    copy!(array_criterias["memory_residual"], array_criterias["memory_residual"]*pesos["memory_residual"])
+
     result = array_criterias["custo_beneficio"] + array_criterias["cp_residual"] + array_criterias["memory_residual"] + array_criterias["storage_residual"]
     return result
 end
@@ -227,44 +220,50 @@ sort!(VNR)
 
 println("VNR => ", VNR, "\n")
 
-calc_custo_beneficio(Gs, BandM, VNR[1])
-println("custo pos calc: ", [Float64(k.custo_beneficio) for k in Gs], "\n")
-calc_cp_residual(Gs, VNR[1])
-println("cp_residual pos calc: ", [Float64(k.cp.residual) for k in Gs], "\n")
+for VM in VNR
+    println(VM)
 
-array_criteria_custo_beneficio = [Float64(k.custo_beneficio) for k in Gs]
-MAUT_norm_criteria_max(array_criteria_custo_beneficio)
-println("custo pos norm: ", array_criteria_custo_beneficio, "\n")
+    calc_custo_beneficio(Gs, BandM, VM)
+    println("custo pos calc: ", [Float64(k.custo_beneficio) for k in Gs], "\n")
+    calc_cp_residual(Gs, VM)
+    println("cp_residual pos calc: ", [Float64(k.cp.residual) for k in Gs], "\n")
 
-
-MAUT_marginalUtilty_custo_beneficio(array_criteria_custo_beneficio)
-println("custo pos U: ", array_criteria_custo_beneficio, "\n")
-
-array_criteria_cp_residual = [k.cp.residual for k in Gs]
-
-MAUT_norm_criteria_max(array_criteria_cp_residual)
-println("cp_residual pos norm: ", array_criteria_cp_residual, "\n")
-MAUT_marginalUtility_cp_residual(array_criteria_cp_residual)
-println("cp_residual pos U: ", array_criteria_cp_residual, "\n")
-
-calc_storage_residual(Gs, VNR[1])
-println("storage pos calc: ", [Float64(k.storage.residual) for k in Gs], "\n")
-
-array_criteria_storage_residual = [k.storage.residual for k in Gs]
-
-calc_memory_residual(Gs, VNR[1])
-println("memory pos calc: ", [Float64(k.memory.residual) for k in Gs], "\n")
-
-array_criteria_memory_residual = [k.memory.residual for k in Gs]
-
-MAUT_norm_criteria_max(array_criteria_storage_residual)
-MAUT_norm_criteria_max(array_criteria_memory_residual)
-
-println("storage_residual pos norm: ", array_criteria_storage_residual, "\n")
-println("memory_residual pos norm: ", array_criteria_memory_residual, "\n")
+    array_criteria_custo_beneficio = [Float64(k.custo_beneficio) for k in Gs]
+    MAUT_norm_criteria_max(array_criteria_custo_beneficio)
+    println("custo pos norm: ", array_criteria_custo_beneficio, "\n")
 
 
-PESOS = Dict("custo_beneficio" => 0.55, "cp_residual" => 0.15, "storage_residual" => 0.15, "memory_residual" => 0.15)
-array_criterias = Dict("custo_beneficio" => array_criteria_custo_beneficio, "cp_residual" => array_criteria_cp_residual, "storage_residual" => array_criteria_storage_residual, "memory_residual" => array_criteria_memory_residual)
-result = MAUT_globalUtility(array_criterias, PESOS)
-println(result)
+    MAUT_marginalUtilty_custo_beneficio(array_criteria_custo_beneficio)
+    println("custo pos U: ", array_criteria_custo_beneficio, "\n")
+
+    array_criteria_cp_residual = [k.cp.residual for k in Gs]
+
+    MAUT_norm_criteria_max(array_criteria_cp_residual)
+    println("cp_residual pos norm: ", array_criteria_cp_residual, "\n")
+    MAUT_marginalUtility_cp_residual(array_criteria_cp_residual)
+    println("cp_residual pos U: ", array_criteria_cp_residual, "\n")
+
+    calc_storage_residual(Gs, VM)
+    println("storage pos calc: ", [Float64(k.storage.residual) for k in Gs], "\n")
+
+    array_criteria_storage_residual = [k.storage.residual for k in Gs]
+
+    calc_memory_residual(Gs, VM)
+    println("memory pos calc: ", [Float64(k.memory.residual) for k in Gs], "\n")
+
+    array_criteria_memory_residual = [k.memory.residual for k in Gs]
+
+    MAUT_norm_criteria_max(array_criteria_storage_residual)
+    MAUT_norm_criteria_max(array_criteria_memory_residual)
+
+    println("storage_residual pos norm: ", array_criteria_storage_residual, "\n")
+    println("memory_residual pos norm: ", array_criteria_memory_residual, "\n")
+
+
+    PESOS = Dict("custo_beneficio" => 0.55, "cp_residual" => 0.15, "storage_residual" => 0.15, "memory_residual" => 0.15)
+    array_criterias = Dict("custo_beneficio" => array_criteria_custo_beneficio, "cp_residual" => array_criteria_cp_residual, "storage_residual" => array_criteria_storage_residual, "memory_residual" => array_criteria_memory_residual)
+
+    println("array criterias e pesos: \n", array_criterias, "\n", PESOS)
+    result = MAUT_globalUtility(array_criterias, PESOS)
+    println(result)
+end
