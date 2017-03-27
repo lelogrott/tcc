@@ -130,9 +130,34 @@ end
 function calc_custo_beneficio(Gs::Array{Server}, BandM::Array{Float64},vnr::VirtualMachine)
     Band_v = Σ([link[2] for link in vnr.links])
     for i=1:length(Gs)
-        println(vnr.cp, " / ", Gs[i].cp.atual, " + ", Band_v, " / ", Σ([k for k in BandM[i,1:size(BandM,1)]]), " = ")
         Gs[i].custo_beneficio = (vnr.cp / Gs[i].cp.atual) + (Band_v / Σ([k for k in BandM[i,1:size(BandM,1)]]))
-        println(" ", Gs[i].custo_beneficio, "\n\n")
+    end
+end
+
+function index_of_higher_value_element(array::Array{Float64})
+    index = 0
+    higher_value = -1
+    for i=1:length(array)
+        if (array[i] > higher_value)
+            index = i
+            higher_value = array[i]
+        end
+    end
+    return index
+end
+
+function do_allocate(Gs::Array{Server}, selected_server::Int64, VM::VirtualMachine)
+    for i=1:length(Gs)
+        if (i == selected_server)
+            Gs[i].cp.atual = Gs[i].cp.residual
+            Gs[i].storage.atual = Gs[i].storage.residual
+            Gs[i].memory.atual = Gs[i].memory.residual
+            push!(Gs[i].VMs, VM)
+        end
+        Gs[i].storage.residual = 0
+        Gs[i].cp.residual = 0
+        Gs[i].memory.residual = 0
+        Gs[i].custo_beneficio = 0
     end
 end
 
@@ -249,5 +274,16 @@ for VM in VNR
     MAUT_norm_criteria_max(array_criterias["memory_residual"])
 
     result = MAUT_globalUtility(array_criterias, PESOS)
-    println(result)
+    println(array_criterias, "\n", result, "\n")
+
+    selected_server = index_of_higher_value_element(result)
+    do_allocate(Gs, selected_server, VM)
+end
+for i=1:length(Gs)
+    println("\nSERVER ", i, "\n---------------")
+    println("cp top: ", Gs[i].cp.top, "\ncp atual: ", Gs[i].cp.atual, "\ncp residual: ", Gs[i].cp.residual)
+    println("storage top: ", Gs[i].storage.top, "\nstorage atual: ", Gs[i].storage.atual, "\nstorage residual: ", Gs[i].storage.residual)
+    println("memory top: ", Gs[i].memory.top, "\nmemory atual: ", Gs[i].memory.atual, "\nmemory residual: ", Gs[i].memory.residual)
+    println("custo beneficio: ", Gs[i].custo_beneficio)
+    println("VMs: ", Gs[i].VMs)
 end
