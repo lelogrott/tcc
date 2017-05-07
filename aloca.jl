@@ -144,7 +144,7 @@ end
 
 function index_of_higher_value_element(array::Array{Float64, 1})
     index = 0
-    higher_value = -1
+    higher_value = -2
     println("\tanalisando ", array)
     for i=1:length(array)
         if (array[i] > higher_value)
@@ -158,15 +158,21 @@ end
 
 function all_positive_residual_values_in(node::Server, VM::VirtualMachine)
     if (node.cp.residual < 0)
+        println("fail in cp: ", node.cp.residual)
         return false
     end
     if (node.storage.residual < 0)
+        println("fail in storage: ", node.storage.residual)
         return false
     end
     if (node.memory.residual < 0)
+        println("fail in memory: ", node.storage.residual)
         return false
     end
-    if (node.residual_band - Σ([link[2] for link in VM.links]) < 0)
+    residual_band = node.residual_band - Σ([link[2] for link in VM.links])
+    residual_band += Σ([(link[2] * 2) for link in VM.links if link[1] in [vm.id for vm in node.VMs]])
+    if (residual_band < 0)
+        println("fail in residual band: ", node.residual_band, " | band from vm: ", Σ([link[2] for link in VM.links]))
         return false
     end
     return true
@@ -184,6 +190,7 @@ function do_allocate(Gs::Array{Server, 1}, selected_server::Int64, VM::VirtualMa
             Gs[i].memory.atual = Gs[i].memory.residual
             push!(Gs[i].VMs, VM)
             Gs[i].residual_band -= Σ([link[2] for link in VM.links])
+            Gs[i].residual_band += Σ([(link[2] * 2) for link in VM.links if link[1] in [vm.id for vm in Gs[i].VMs]])
             ret = true
         end
         Gs[i].storage.residual = 0
@@ -273,14 +280,17 @@ iteration = 1
 i=1
 first_host = -1
 first_host_key = -1
+
+# SET STABLE VARIABLES
+STABLE_BandM = deepcopy(BandM)
+STABLE_Gs = deepcopy(Gs)
 while i <= length(VNR)
     VM = VNR[i]
     println(VM)
-        println("@@ entrou no calc")
-        calc_custo_beneficio(Gs, BandM, VM)
-        calc_cp_residual(Gs, VM)
-        calc_storage_residual(Gs, VM)
-        calc_memory_residual(Gs, VM)
+    calc_custo_beneficio(Gs, BandM, VM)
+    calc_cp_residual(Gs, VM)
+    calc_storage_residual(Gs, VM)
+    calc_memory_residual(Gs, VM)
 
     if (!haskey(results, VM.id))
         array_criterias["custo_beneficio"] = [Float64(k.custo_beneficio) for k in Gs]
@@ -304,38 +314,54 @@ while i <= length(VNR)
         
         println("-------------------------\n",array_criterias, "\n", current_result, "\n-------------------------")
 
-        push!(results, VM.id => current_result)        
+        push!(results, VM.id => current_result) #store the results in a array with the VM's id as key
     end
     println("Alocando VM ", VM.id)
 
     selected_server = index_of_higher_value_element(haskey(results, VM.id) ? results[VM.id] : current_result)
+    STABLE_HOST = deepcopy(Gs[selected_server])
     println("Server selecionado: ", selected_server)
-    if i == 1
+    if (i == 1)
         first_host = selected_server
         println("primeira iteracao, setando first_host and first_host_key\n.\n.\n.")
         first_host_key = VM.id
         results[VM.id][selected_server] = -1
     end
     println("Resultados para VM ", VM.id, " : ", results[VM.id])
+
     if !do_allocate(Gs, selected_server, VM)
+        # Gs[i].residual_band += Σ([link[2] for link in VM.links])
+        Gs[i] = STABLE_HOST
         if (Σ(results[first_host_key]) == -length(results[first_host_key]))
             println("Fail to allocate VNR")
-            deallocate(Gs, BandM, substrate_network_changes, first_host_key, first_host, results)
+            a = copy(STABLE_Gs)            
+            BandM = copy(STABLE_BandM)
             return 0
         end
-        println("Alocacao falhou, iniciando processo de desalocacao\n")
-        deallocate(Gs, BandM, substrate_network_changes, first_host_key, first_host, results)
-        delete!(results, VM.id)
-        for key in keys(results)
-            if(key != first_host_key)
-                delete!(results, key)
+        println("Alocacao falhou, partindo para proxima opcao\n")
+
+        #if(selected_server > 0)
+        results[VM.id][selected_server] = -1
+        #end
+        if (Σ(results[VM.id]) == -length(results[VM.id]))
+            println("Alocacao falhou. partindo para proxima melhor opcao do primeiro server\n")
+            Gs = deepcopy(STABLE_Gs)
+            Gs[i] = STABLE_HOST
+            BandM = deepcopy(STABLE_BandM)
+            for key in keys(results)
+                if(key != first_host_key)
+                    delete!(results, key)
+                else
+                    println("MATCHING KEY")
+                    println(results[key])
+                end
             end
+            deleteat!(substrate_network_changes, 1:length(substrate_network_changes))
+            println("Fim do processo de desalocacao")
+            i = 1
         end
-        deleteat!(substrate_network_changes, 1:length(substrate_network_changes))
-        println("Fim do processo de desalocacao")
         # println(results)
         # return
-        i = 1
     else
         link_path = Array{Int64, 1}()
         if (i > 1)
@@ -344,18 +370,32 @@ while i <= length(VNR)
                     host_src = index_of_higher_value_element(results[VM.id])
                     host_dst = (link[1] == first_host_key) ? first_host : index_of_higher_value_element(results[link[1]])
                     link_path = dijkstra(BandM, host_src, host_dst, link[2])
-                    println(">> PATH FROM ", host_src, " TO ", host_dst, " : ", link_path)
-                    for node in link_path
-                        BandM[host_src, node] -= link[2]
-                        push!(substrate_network_changes, (host_src, node, link[2]))
-                        host_src = node
+                    println(">> PATH FROM ", host_src, " TO ", host_dst, " WITH WIEIGHT ", link[2], " : ", link_path)
+                    if (isempty(link_path) && host_src != host_dst)
+                        println("Nao foi possível alocar banda entre VM ", VM.id, " e ", link[1], "servidores ", host_src, " e ", host_dst, "\n")
+                        println("Restaurando valores de banda da rede fisica e desalocando VM do server \n")
+                        Gs[i] = STABLE_HOST
+                        #pop!(Gs[selected_server].VMs)
+                        for (src, dst, wght) in substrate_network_changes
+                            BandM[src, dst] += wght
+                        end
+                        results[VM.id][host_src] = -1
+                        i-=1
+                        break
+                    else
+                        for node in link_path
+                            BandM[host_src, node] -= link[2]
+                            push!(substrate_network_changes, (host_src, node, link[2]))
+                            host_src = node
+                        end
+                        println("band allocated\n", BandM)
                     end
                 end
             end
-            println("band allocated\n", BandM)
         end
         i += 1
     end
+    readline(STDIN)
 end
 for i=1:length(Gs)
     println("\nSERVER ", i, "\n---------------")
