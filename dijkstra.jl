@@ -41,13 +41,19 @@ function dijkstra(Graph::Array{Float64,2}, src::Int64, dst::Int64, desired_band:
             end
         end
     end
+    no_path = false
     if (sum([sum(k) for k in precedents]) > 0) #garantindo que ha algum precedente de algum no
         while(dst != src)
             unshift!(path, dst)
-            dst = precedents[dst][1]#just take the first one
+            if(isempty(precedents[dst]))
+                no_path = true
+                break
+            else
+                dst = precedents[dst][1]#just take the first one
+            end
         end
     end
-    return path
+    return no_path ? [] : path
     # println("VERTICES   : ");
     # for i = 1:n_vertices
     #     println(i, " ");
