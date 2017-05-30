@@ -1,0 +1,308 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% K=4 %%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+CPU=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 56.1
+  desvio padrao = 6.06 
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 58.57
+  desvio padrao = 6.32 
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 61.63
+  desvio padrao = 6.32 
+
+STORAGE=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 56.53
+  desvio padrao = 6.1  
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 58.93
+  desvio padrao = 6.36
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 61.27
+  desvio padrao = 7.79
+
+MEMORY=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 57.79
+  desvio padrao = 6.38
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 58.56
+  desvio padrao = 5.97
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 60.22
+  desvio padrao = 6.71
+
+BAND=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 54.14
+  desvio padrao = 5.6 
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 55.43
+  desvio padrao = 5.47
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 59.74
+  desvio padrao = 6.71
+
+CUSTO=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 55.32
+  desvio padrao = 5.75
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 55.45
+  desvio padrao = 5.20
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 57.17
+  desvio padrao = 6.43 
+
+TODOS=1
+  k = 4
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 55.93
+  desvio padrao = 5.05
+
+  k = 4
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 57.95
+  desvio padrao = 6.95 
+
+  k = 4
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 59.39
+  desvio padrao = 5.4
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%% K=8 %%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+CPU=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao =  
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+STORAGE=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+MEMORY=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+BAND=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao =  
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+CUSTO=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+TODOS=1
+  k = 8
+  overbooking = 10%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 20%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 
+
+  k = 8
+  overbooking = 40%
+  vnr = 150
+  eventos = 100
+  iteracoes = 100
+  media = 
+  desvio padrao = 

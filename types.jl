@@ -7,6 +7,7 @@ type VirtualMachine
     LRC_index::Float64
     vnr_id::Float64
     expiration_time::Int64
+    ec2_type::String
 end
 
 type Resource
